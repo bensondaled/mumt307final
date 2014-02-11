@@ -1,0 +1,318 @@
+<html>
+<head>
+	<title>Ben Deverett, MUMT307 Final Project</title>
+	<style type="text/css">
+	.subheading {
+		background-color:66CCFF;
+		border:2px solid black;
+		font-family:Georgia;
+		font-style:italic;
+		padding-left:5px;
+	}
+	.content {
+		font-family:Georgia;
+		padding-top:15px;
+		padding-bottom:20px;
+		padding-left:12px;
+	}
+	.mainheading {
+		background-color:66CCFF;
+		border:4px solid black;
+		text-align:center;
+		font-family:Georgia;
+		font-weight:bold;
+		font-size:20px;
+		padding-top:10px;
+		padding-bottom:10px;
+	}
+	.navigationbar {
+		background-color:3399FF;
+		border-bottom-style:solid;
+		border-left-style:solid;
+		border-right-style:solid;
+		border-color:black;
+		border-width:2px;
+		text-align:center;
+		font-family:Georgia;
+		margin-left:100px;
+		margin-right:100px;
+	}
+	.navblock {
+		width:16.66667%;
+		text-align:center;
+	}
+	.paramname {
+		text-align:right;
+		font-weight:bold;
+		font-style:italic;
+		padding-right:10px;
+	}
+	.paramtype {
+		text-align:right;
+		font-style:italic;
+		padding-right:15px;
+	}
+	body {background-color:#99FFFF;}
+	a:link {
+		color: black;
+		text-decoration:none;
+	}
+	a:visited {
+		color: black;
+		text-decoration:none;
+	}
+	a:hover {
+		color: #6633CC;
+		text-decoration:none;
+	}
+	a:active {
+		color: white;
+		text-decoration:none;
+	}
+	ul{
+		margin-top:0px;
+		margin-bottom:0px;		
+	}
+	h1{
+		font-size:20px;	
+	}
+	.thick{
+		color:#000;
+		background-color:#000;
+		height:3px;
+		border:none;	
+	}
+	.thin{
+		color:#000;
+		background-color:#000;
+		height:1px;
+		border:none;
+	}
+	ul{
+		margin-left:20px;
+		padding-left:0px;
+	}
+	img{
+		width:430px;
+		height:330px;	
+	}
+	.smallpic{
+		width:200px;
+		height:160px;
+	}
+	.caption{
+		text-align:center;
+		font-size:13px;
+	}
+	</style>
+</style>
+</head>
+<body>
+	<div class="mainheading">
+		Ben Deverett, MUMT307 Final Project
+		<br/>
+		<a class="caption" href="http://music.mcgill.ca/~ben/306final">(click here for MUMT306 final project)</a>
+	</div>
+	<div class="navigationbar">
+		<table style="margin: 0 auto" width="100%"><tr>
+			<td class="navblock"><a href="#Summary">Summary</a></td>
+			<td class="navblock"><a href="#Software">Software</a></td>
+			<td class="navblock"><a href="#Overview">Overview</a></td>
+			<td class="navblock"><a href="#Sections">Sections</a></td>
+			<td class="navblock"><a href="#Source">Source</a></td>
+			<td class="navblock"><a href="#References">References</a></td>
+		</tr></table>
+	</div>
+	<br/>
+	<br/>	
+	<div class="subheading" name="Summary">  <a name="Summary"/>
+		--Summary--
+	</div>
+	<div class="content">
+		The goal of the project is to implement a Matlab-based algorithm for elementary tempo detection of audio samples. The algorithm was proposed and explained in detail by Eric Scheirer in 1997 <b><a href="#References">[1]</a></b>. In brief, it uses a combination of frequency domain and time domain analyses to localize and track sections of audio likely to be `downbeats' of the rhythm, and this data is combined to approximate the tempo of the piece.
+	</div>
+	<div class="subheading" name="Software">  <a name="Software"/>
+		--Software--
+	</div>
+	<div class="content">
+		<ul>
+			<li>
+				<b><a href="http://www.mathworks.com/products/matlab/">Matlab:</a></b> the language and environment used to write and test the project implementation
+			</li>
+		</ul>
+	</div>
+	<div class="subheading" name="Overview"> <a name="Overview"/>
+		--Overview-
+	</div>
+	<div class="content">
+		This algorithm works through a series of steps that effectively reveal the strongest periodic amplitude fluctuations present in the signal. The first steps (envelope extraction, differentiation, rectification) serve to simplify the signal's overall amplitude trends, and the last step (comb filtering) determines the most likely tempo of the simplified signal. 
+		<br/><br/> The algorithm can be implemented with an initial separation of frequency bands in the signal, serving to `catch' the strongest rhythm from various instruments. This operation emulates the apparent cross-band rhythmic integration that Scheirer hypothesizes is performed by the human auditory system. In this implementation, this separation is optional. 
+		<br/><br/>Following this step, the amplitude envelope of the signal is calculated and smoothed, and this envelope is treated as the signal in the following steps. The reason this is satisfactory is because the algorithm depends on the large-scale amplitude trends within the signal. 
+		<br/><br/>Next, the signal is differentiated and half-wave rectified, yielding a ``sharper'' signal with regard to amplitude peaks. The details of these steps are quite mathematically complex, but they serve to better reveal and isolate the ``downbeats'' of the rhythm in the signal. 
+		<br/><br/>Finally, to determine the tempo, the signal is compared to a bank of ``pure signals'' at specific tempos, or more specifically, comb filters defined as impulse trains with frequencies corresponding to specific tempos. Convolution with these filters yields a signal whose energy reflects the extent to which the test signal ``matches'' the filter's. This can be considered analogous to the DFT, which ``compares'' the signal to a bank of sinusoids, and the result of this comparison is a value proportional to the presence of each sinusoid within the signal. The tempo of the filter whose convolution with the test signal yields the highest energy is taken to be the tempo of the original signal.
+		<br/><br/>
+		<div class="subheading" name="Sections">  <a name="Sections"/>
+			--Sections--
+		</div>
+		<br/>
+		The algorithm is implemented in a single Matlab script separated into sections corresponding to the steps described above. These sections are explained in detail below. All example plots were generated using a 15-second clip from a rock song with a well defined 4/4 beat at 96 beats per minute (wav file is included with project <b><a href="#Source">source code</b></a>).
+		<br/><br/><hr class="thin"/>
+
+		<h1> Parameters </h1> This section defines the project parameters, which can be modified to suit the desired resolution, efficiency, and more:
+		<br/>
+		<br/>
+		<table>
+			<tr>
+				<td class=paramname>`filename' </td> 
+				<td class=paramtype> (string) : </td> 
+				<td> name of file to be analyzed, should be .wav file, ~5-15 seconds long </td>
+			</tr>
+			<tr>
+				<td class=paramname>`band_separation' </td> 
+				<td class=paramtype> (`yes'/`no') : </td>
+				<td> binary argument indicating whether the signal should be separated into frequency bands at the start of the analysis </td>
+			</tr>
+			<tr>
+				<td class=paramname>`halfhan_win_length' </td> 
+				<td class=paramtype>(float) : </td>
+				<td>length of half-hanning window used for envelope smoothing, in seconds </td>
+			</tr>
+			<tr>
+				<td class=paramname>`comb_n_impulses' </td>
+				<td class=paramtype>(int) : </td>
+				<td>number of impulses used to define comb filters that will be convolved with processed test signal </td>
+			</tr>
+			<tr>
+				<td class=paramname>`tempo_min' </td>
+				<td class=paramtype>(int) : </td>
+				<td>minimum tempo to be tested, in beats per minute </td>
+			</tr>
+			<tr>
+				<td class=paramname>`tempo_max'  </td>
+				<td class=paramtype>(int) : </td>
+				<td>maximum tempo to be tested, in beats per minute </td>
+			</tr>
+			<tr>
+				<td class=paramname>`tempo_resolution'  </td>
+				<td class=paramtype>(int) : </td>
+				<td>size of step increment from <i>tempo_min</i> to <i>tempo_max</i>, in beats per minute </td>
+			</tr>
+		</table>
+
+		<br/><hr class="thin"/>
+
+		<h1>Frequency Bands </h1> 
+		First, the signal is read and converted to the frequency domain using the FFT. It is then separated into bands of various frequency ranges. If the <i>band_separation</i> parameter is set to `yes', these bands are delimited as follows: 0-200 Hz, 200-400 Hz, 400-800 Hz, 800-1600 Hz, 1600-3200 Hz, 3200-fs/2 Hz, where fs/2 is the Nyquist frequency. If the <i>band_separation</i> parameter is set to `no', the entire signal is analyzed as one band, namely 0-fs/2 Hz. For many signals, the algorithm is just as effective without frequency band separation.
+		<br/><br/>
+		Figure 1 shows the magnitude frequency response of each frequency band when <i>band_separation</i> is set to `yes'. Each of the remaining steps is performed on each of the frequency banded signals.
+		<br/><br/>
+		<div align="center">
+			<br/>
+			<table width="100%"><tr>
+				<td width="16.66%" align="center">	
+					<img class="smallpic" src="307/figures/fig1-1.jpg">
+				</td>
+				<td width="16.66%" align="center">
+					<img class="smallpic" src="307/figures/fig1-2.jpg">
+				</td>
+				<td width="16.66%" align="center">
+					<img class="smallpic" src="307/figures/fig1-3.jpg">
+				</td>
+				<td width="16.66%" align="center">
+					<img class="smallpic" src="307/figures/fig1-4.jpg">
+				</td>
+				<td width="16.66%" align="center">
+					<img class="smallpic" src="307/figures/fig1-5.jpg">
+				</td>
+				<td width="16.66%" align="center">
+					<img class="smallpic" src="307/figures/fig1-6.jpg">
+				</td>
+			</tr></table>
+		</div>
+		<br/>
+		<div class="caption"> Figure 1: Frequency Magnitude Responses of Frequency Bands </div>
+		<br/><hr class="thin"/>
+
+		<h1>Envelope Extraction: </h1> 
+		The signal is converted to the time-domain using the inverse FFT, full-wave rectified, then convolved with a half Hanning window (calculated by <a href="http://www.music.mcgill.ca/~gary/307/week10/node12.html#fig:hann"><b>this</b></a> definition). (This convolution is performed as multiplication in the frequency domain.) These operations serve to convert the signal into a positive-valued envelope, representing the overall amplitude fluctuations in the signal. Convolution with the half Hanning window serves to smooth this envelope, applying a sort of low-pass filter in the process. Figure 2 shows the original signal and the envelope extracted using this method.
+		<br/><br/>
+		<div align="center">
+			<br/>
+			<table width="70%"><tr>
+				<td width="50%" align="center">	
+					<img src="307/figures/fig2-1.jpg">
+					<div class="caption">  Figure 2a: Original Signal in Time Domain </div>
+				</td>
+				<td width="50%" align="center">
+					<img src="307/figures/fig2-2.jpg">
+					<div class="caption"> Figure 2b: Signal Envelope in Time Domain </div>
+				</td>
+			</tr></table>
+		</div>
+		<br/><hr class="thin"/>
+
+		<h1>Differentiation and Rectification: </h1> 
+		The signal is then discretely differentiated, because the ``derivative-of-envelope function performs a type of onset filtering process'' <b><a href="#References">[1]</a></b>. Essentially, the periodic fluctuations in the signal are easier to detect from the signal's first derivative. The signal is then half-wave rectified to avoid sensitivity to onset imperfections by broadening the time-domain response to perceptual attacks <b><a href="#References">[1]</a></b>. The reason for this step is more intuitively understood when observing the time domain signal after differentiation and rectification, shown in Figures 3 and 4 respectively.
+		<br/><br/>
+		<div align="center">
+			<br/>
+			<table width="70%"><tr>
+				<td width="50%" align="center">	
+					<img src="307/figures/fig3-1.jpg">
+					<div class="caption"> Figure 3: Differentiated Time Domain Signal </div>
+				</td>
+				<td width="50%" align="center">
+					<img src="307/figures/fig3-2.jpg">
+					<div class="caption"> Figure 4: Rectified Time Domain Signal </div>
+				</td>
+			</tr></table>
+		</div>
+		<br/><hr class="thin"/>
+
+			<h1>Comb Filtering: </h1> 
+			Next, a filter-bank is created, containing one comb filter for every tempo from <i>tempo_min</i> to <i>tempo_max</i> in intervals of <i>tempo_resolution</i>. These comb filters are defined as time domain impulse trains, such that the frequency of impulses in filter `i' is proportional to the i'th tempo being tested. Figure 5 shows one such comb filter.
+				<br/><br/>
+				<div align="center">
+					<br/>
+					<table width="70%"><tr>
+						<td width="50%" align="center">	
+							<img src="307/figures/fig5-1.jpg">
+							<div class="caption"> Figure 5a: A Comb Filter (Time Domain) </div>
+						</td>
+						<td width="50%" align="center">
+							<img src="307/figures/fig5-2.jpg">
+							<div class="caption"> Figure 5b: A Comb Filter (Frequency Domain) </div>
+						</td>
+					</tr></table>
+				</div>
+				<br/>
+			
+			 The signal is convolved with each of these comb filters (performed as multiplication in the frequency domain), and the energy of the resultant signal is calculated (the energy values for each frequency band are summed). Figure 6 shows the energy of the convolution product for a range of comb filters corresponding to possible tempos.
+			<br/><br/>
+			<div align="center">
+				<img src="307/figures/fig6.jpg">
+			</div>
+			<br/>
+			<div class="caption"> Figure 6: Energy of Convolution Product of Signal and Comb Filterbank </div>
+			<br/><br/>
+			The tempo associated with the filter that yields the maximum energy is taken to be the tempo of the original signal. In this case, the global maximum lies at 96 bpm, and that is the tempo of the audio sample.
+			<br/>
+	</div>
+	<div class="subheading" name="Source"> <a name="Source"/>
+		--Source--
+	</div>
+	<div class="content">
+		The source code for this project can be found <b><a href="307/src.zip">here.</a></b><br/>
+	</div>
+	<div class="subheading" name="References"> <a name="References"/>
+		--References--
+	</div>
+	<div class="content">
+		<ol>
+			<li><b><a href="307/scheirer1997.pdf">Tempo and beat analysis of acoustic musical signals (Scheirer, 1997)</a></b></li>
+			<br/>
+			<li><b><a href="307/beatdetect.pdf">Beat Detection Algorithms (Patin, 2003)</a></b></li>
+		</ol>
+	</div>
+</body>
+<html>
